@@ -59,11 +59,12 @@ class Blockchain(object):
         # or we'll have inconsistent hashes
 
         # TODO: Create the block_string
+
         string_obj = json.dumps(block, sort_keys=True).encode()
 
         # TODO: Hash this string using sha256
-        raw_hash = hashlib.sha256(string_obj)
 
+        raw_hash = hashlib.sha256(string_obj)
         hex_hash = raw_hash.hexdigest()
 
         # By itself, the sha256 function returns the hash in a raw string
@@ -71,15 +72,13 @@ class Blockchain(object):
         # This can be hard to read, but .hexdigest() converts the
         # hash to a string of hexadecimal characters, which is
         # easier to work with and understand
-
         # TODO: Return the hashed block string in hexadecimal format
         return hex_hash
-
     @property
     def last_block(self):
         return self.chain[-1]
-
     def proof_of_work(self, block):
+
         """
         Simple Proof of Work Algorithm
         Stringify the block and look for a proof.
@@ -87,6 +86,7 @@ class Blockchain(object):
         in an effort to find a number that is a valid proof
         :return: A valid proof for the provided block
         """
+
         block_string = json.dumps(block)
         proof = 0
         while self.valid_proof(block_string, proof) is False:
@@ -107,18 +107,14 @@ class Blockchain(object):
         """
         guess = f"{block_string}{proof}".encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-
         return guess_hash[:3] == "000"
 
 # Instantiate our Node
 app = Flask(__name__)
-
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
-
 # Instantiate the Blockchain
 blockchain = Blockchain()
-
 
 @app.route('/mine', methods=['POST'])
 def mine():
@@ -128,6 +124,11 @@ def mine():
     # previous_hash = blockchain.hash(blockchain.last_block)
     # block = blockchain.new_block(proof, previous_hash)
     values = request.get_json()
+    req = ['proof', 'id']
+    if not all (k in values for k in req)
+        response = {'message': 'Missing Values'}
+        return jsonify(response), 400
+
     last_block_string = json.dumps(blockchain.last_block, sort_keys=True)
     if blockchain.valid_proof(last_block_string, values['proof']):
         prev_hash = blockchain.hash(blockchain.last_block)
@@ -141,9 +142,6 @@ def mine():
             'message': 'Proof Error'
         }
         return jsonify(response), 401
-
-
-
 @app.route('/chain', methods=['GET'])
 def full_chain():
     response = {
@@ -152,17 +150,13 @@ def full_chain():
         'chain': blockchain.chain
     }
     return jsonify(response), 200
-
 @app.route('/last_block', methods=['GET'])
 def last_block():
     last = blockchain.last_block
-
     response = {
         'last_block': last
     }
     return jsonify(response), 200
-
 # Run the program on port 5000
 if __name__ == '__main__':
     app.run(host='localhost', port=5000, debug=True)
-    
